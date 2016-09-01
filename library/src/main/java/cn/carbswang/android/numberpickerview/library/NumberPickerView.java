@@ -5,6 +5,7 @@ import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Paint.Align;
+import android.graphics.Typeface;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Message;
@@ -162,6 +163,9 @@ public class NumberPickerView extends View{
     private Paint mPaintDivider = new Paint();
     private Paint mPaintText = new Paint();
     private Paint mPaintHint = new Paint();
+
+    private Typeface mNormalFont;
+    private Typeface mSelectedFont;
 
     private String[] mDisplayedValues;
     private CharSequence[] mAlterTextArrayWithMeasureHint;
@@ -886,6 +890,14 @@ public class NumberPickerView extends View{
         mOnValueChangeListenerRaw = listener;
     }
 
+    public void setNormalTypeface(Typeface typeface){
+        mNormalFont = typeface;
+    }
+
+    public void setSelectedTypeface(Typeface typeface){
+        mSelectedFont = typeface;
+    }
+
     //return index relative to mDisplayedValues from 0.
     private int getWillPickIndexByGlobalY(int globalY){
         if(mItemHeight == 0) return 0;
@@ -1202,12 +1214,19 @@ public class NumberPickerView extends View{
             mPaintText.setColor(textColor);
             mPaintText.setTextSize(textSize);
 
+            float textTop = y + mItemHeight / 2 - textSizeCenterYOffset;
+            float textBaseline = y + mItemHeight / 2 + textSizeCenterYOffset;
+            if(textTop > dividerY0 && textBaseline < dividerY1){
+                mPaintText.setTypeface(mSelectedFont);
+            }
+            else{
+                mPaintText.setTypeface(mNormalFont);
+            }
+
             if(0 <= index && index < getOneRecycleSize()){
-                canvas.drawText(mDisplayedValues[index + mMinShowIndex].toString(), mViewCenterX,
-                        y + mItemHeight / 2 + textSizeCenterYOffset, mPaintText);
+                canvas.drawText(mDisplayedValues[index + mMinShowIndex], mViewCenterX, textBaseline, mPaintText);
             } else if(!TextUtils.isEmpty(mEmptyItemHint)){
-                canvas.drawText(mEmptyItemHint, mViewCenterX,
-                        y + mItemHeight / 2 + textSizeCenterYOffset, mPaintText);
+                canvas.drawText(mEmptyItemHint, mViewCenterX, textBaseline, mPaintText);
             }
         }
     }
